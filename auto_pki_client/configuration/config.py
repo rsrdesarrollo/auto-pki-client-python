@@ -10,7 +10,7 @@ class Config(dict):
         try:
             with open(self.config_file, 'r') as f:
                 dict.__init__(self, yaml.load(f))
-        except (OSError) as ex:
+        except (IOError, OSError) as ex:
             with open(self.config_file, 'w'):
                 pass
             dict.__init__(self, {

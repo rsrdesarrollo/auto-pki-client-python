@@ -91,7 +91,7 @@ with Config(args.config) as conf:
     try:
         os.mkdir(cli_cfg['certs_dir'])
         log.info("Certificate's directory created on %s", cli_cfg['certs_dir'])
-    except (OSError) as e:
+    except (IOError, OSError) as e:
         pass
 
     cacert_path = os.path.join(cli_cfg['certs_dir'], srv_cfg['cacert'])

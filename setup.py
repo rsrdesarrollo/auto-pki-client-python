@@ -23,7 +23,11 @@ setup(
     license = "GPL-3.0",
     keywords = "Enrollment secure transport",
     scripts=['scripts/auto-pki-client'],
-    packages=['auto_pki_client'],
+    packages=[
+        'auto_pki_client',
+        'auto_pki_client.aux',
+        'auto_pki_client.configuration',
+    ],
     install_requires=[
         'pyYaml',
         'zeroconf',

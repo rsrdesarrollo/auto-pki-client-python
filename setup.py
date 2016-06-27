@@ -16,7 +16,7 @@ def read(fname):
 
 setup(
     name = "auto_pki_client",
-    version = "0.1.1",
+    version = "0.1.2",
     author = "Raúl Sampedro",
     author_email = "rsrdesarrollo@gmail.com",
     description = ('Client to interact with an EST server - RFC 7030.'),

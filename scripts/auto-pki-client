@@ -89,7 +89,7 @@ with Config(args.config) as conf:
         sys.exit()
 
     try:
-        os.mkdir(cli_cfg['certs_dir'])
+        os.makedirs(cli_cfg['certs_dir'])
         log.info("Certificate's directory created on %s", cli_cfg['certs_dir'])
     except (IOError, OSError) as e:
         pass

@@ -15,7 +15,7 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 setup(
-    name = "auto-pki-client",
+    name = "auto_pki_client",
     version = "0.1.1",
     author = "Raúl Sampedro",
     author_email = "rsrdesarrollo@gmail.com",
@@ -23,7 +23,7 @@ setup(
     license = "GPL-3.0",
     keywords = "Enrollment secure transport",
     scripts=['scripts/auto-pki-client'],
-    packages=['auto_pki'],
+    packages=['auto_pki_client'],
     install_requires=[
         'pyYaml',
         'zeroconf',

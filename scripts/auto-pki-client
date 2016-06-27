@@ -10,9 +10,9 @@ from time import sleep
 from est.client import Client
 from est.errors import TryLater, RequestError
 
-from auto_pki.configuration.config import Config
-from auto_pki.aux.crypto import fingerprint
-from auto_pki.aux.discovery import get_est_services
+from auto_pki_client.configuration.config import Config
+from auto_pki_client.aux.crypto import fingerprint
+from auto_pki_client.aux.discovery import get_est_services
 
 parser = argparse.ArgumentParser(
     description="Start Auto-PKI client"
@@ -53,7 +53,7 @@ logging.basicConfig(level=log_level)
 logging.getLogger('zeroconf').setLevel(log_level)
 logging.getLogger('request').setLevel(log_level)
 
-log = logging.getLogger('auto-pki-client')
+log = logging.getLogger('auto_pki_client')
 log.setLevel(log_level)
 log.addHandler(logging.StreamHandler(sys.stdout))
 

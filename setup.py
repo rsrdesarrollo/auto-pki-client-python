@@ -26,10 +26,11 @@ setup(
     packages=['auto_pki'],
     install_requires=[
         'pyYaml',
-        'zeroconf'
+        'zeroconf',
+        'est>=0.2'
     ],
-    dependency_link=[
-        'https://github.com/rsrdesarrollo/est-client-python/tarball/master#egg=est'
+    dependency_links=[
+        'https://github.com/rsrdesarrollo/est-client-python/tarball/master#egg=est-0.2'
     ],
     long_description=read('README.md'),
     classifiers=[

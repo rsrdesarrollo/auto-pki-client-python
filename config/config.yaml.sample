@@ -1,0 +1,8 @@
+client:
+  certs_dir: ./certs/
+  password: bootstrap
+  username: bootstrap
+server:
+  cacert: cacert.pem
+  host: est.local.domain.net
+  port: 3443

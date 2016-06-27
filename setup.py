@@ -27,10 +27,10 @@ setup(
     install_requires=[
         'pyYaml',
         'zeroconf',
-        'est>=0.2'
+        'est>=0.2.1'
     ],
     dependency_links=[
-        'https://github.com/rsrdesarrollo/est-client-python/tarball/master#egg=est-0.2'
+        'https://github.com/rsrdesarrollo/est-client-python/tarball/master#egg=est-0.2.1'
     ],
     long_description=read('README.md'),
     classifiers=[

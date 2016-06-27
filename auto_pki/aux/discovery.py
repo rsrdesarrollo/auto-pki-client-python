@@ -4,8 +4,7 @@ import socket
 
 def get_est_services(timeout=5):
     with ESTDiscovery() as est_discovery:
-        for i in range(1,10):
-            time.sleep(timeout/10)
+        time.sleep(timeout)
 
         return est_discovery.get_found_services()
 

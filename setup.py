@@ -1,6 +1,7 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
-EST Client
+Auto PKI Client
 ==========
 """
 import os
@@ -21,7 +22,8 @@ setup(
     description = ('Client to interact with an EST server - RFC 7030.'),
     license = "GPL-3.0",
     keywords = "Enrollment secure transport",
-    packages=['est'],
+    scripts=['scripts/auto-pki-client'],
+    packages=['auto_pki'],
     install_requires=[
         'pyYaml',
         'zeroconf'
@@ -31,8 +33,11 @@ setup(
     ],
     long_description=read('README.md'),
     classifiers=[
-        "Development Status :: 5 - Production/Stable",
-        "Topic :: Utilities",
-        "License :: OSI Approved :: MIT License",
+        'Development Status :: 4 - Beta',
+        'Environment :: Console',
+        'Intended Audience :: End Users/Desktop',
+        'Intended Audience :: System Administrators',
+        'Operating System :: POSIX',
+        'Programming Language :: Python'
     ],
 )

@@ -55,7 +55,6 @@ logging.getLogger('request').setLevel(log_level)
 
 log = logging.getLogger('auto_pki_client')
 log.setLevel(log_level)
-log.addHandler(logging.StreamHandler(sys.stdout))
 
 
 def discovery_est(conf):

@@ -5,6 +5,7 @@ import argparse
 import sys
 import logging
 import socket
+import signal
 from time import sleep
 
 from est.client import Client
@@ -56,6 +57,11 @@ logging.getLogger('request').setLevel(log_level)
 log = logging.getLogger('auto_pki_client')
 log.setLevel(log_level)
 
+def _exit_handler(signum, frame):
+    log.info("Force exti.")
+    sys.exit()
+
+signal.signal(signal.SIGTERM, _exit_handler)
 
 def discovery_est(conf):
     services = get_est_services()
@@ -156,6 +162,7 @@ with Config(args.config) as conf:
 
     done = False
     while not done:
+        sleep_sec = 60
         try:
             client_cert = client.simpleenroll(csr)
             done = True
@@ -165,11 +172,12 @@ with Config(args.config) as conf:
         except (TryLater) as ex:
             if not args.wait_for_cert:
                 break
-
-            log.info("Waiting for cert %d seconds.", ex.seconds)
-            sleep(ex.seconds)
+            sleep_sec = ex.seconds
         except (RequestError) as ex:
             log.error("Request error to EST simple enroll service. ERROR: %s", ex.message)
         except (OSError) as ex:
             log.error("Failed to write Certificate file to %s. ERROR: %s", cert_path, ex.message)
             sys.exit(4)
+
+        log.info("Waiting for retry %d seconds.", ex.seconds)
+        sleep(sleep_sec)

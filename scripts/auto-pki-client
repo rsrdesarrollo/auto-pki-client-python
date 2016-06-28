@@ -58,7 +58,7 @@ log = logging.getLogger('auto_pki_client')
 log.setLevel(log_level)
 
 def _exit_handler(signum, frame):
-    log.info("Force exti.")
+    log.info("Force exit.")
     sys.exit()
 
 signal.signal(signal.SIGTERM, _exit_handler)

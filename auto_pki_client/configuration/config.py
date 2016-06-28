@@ -1,6 +1,11 @@
 import yaml
 import os
 import logging
+import string
+import random
+
+def password_generator(size=6, chars=string.ascii_uppercase + string.digits):
+    return ''.join(random.choice(chars) for _ in range(size))
 
 log = logging.getLogger('auto_pki_client')
 
@@ -26,7 +31,8 @@ class Config(dict):
                 'client':{
                     'certs_dir':'./certs/',
                     'password': 'bootstrap',
-                    'username': 'bootstrap'
+                    'username': 'bootstrap',
+                    'export_key': password_generator(size=20)
                 },
                 'server': {
                     'cacert': 'cacert.pem'

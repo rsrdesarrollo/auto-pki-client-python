@@ -38,12 +38,13 @@ class ESTDiscovery (object):
         if state_change == ServiceStateChange.Added:
             info = zeroconf.get_service_info(service_type, name, timeout=10000)
             if info:
+                server = info.server.encode('ascii', 'ignore')
                 srv = ESTServer(
                     address=socket.inet_ntoa(info.address),
                     port=info.port,
                     weight=info.weight,
                     priority=info.priority,
-                    server=(info.server,info.server[:-1])[info.server[-1] == '.']
+                    server=(server,server[:-1])[server[-1] == '.']
                 )
 
                 if info.properties:

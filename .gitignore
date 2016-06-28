@@ -86,4 +86,5 @@ ENV/
 .idea
 certs/*.pem
 certs/*.csr
+certs/*.pfx
 config/config.yaml

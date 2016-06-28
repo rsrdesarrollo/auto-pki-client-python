@@ -16,7 +16,7 @@ def read(fname):
 
 setup(
     name = "auto_pki_client",
-    version = "0.1.4",
+    version = "0.1.5",
     author = "Raúl Sampedro",
     author_email = "rsrdesarrollo@gmail.com",
     description = ('Client to interact with an EST server - RFC 7030.'),
@@ -31,6 +31,7 @@ setup(
     install_requires=[
         'pyYaml',
         'zeroconf',
+        'pyqrcode',
         'est>=0.2.1'
     ],
     dependency_links=[

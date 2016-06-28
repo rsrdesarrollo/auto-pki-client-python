@@ -6,17 +6,25 @@ import sys
 import logging
 import socket
 import signal
+import pyqrcode
 from time import sleep
+from OpenSSL import crypto
 
 from est.client import Client
 from est.errors import TryLater, RequestError
 
 from auto_pki_client.configuration.config import Config
-from auto_pki_client.aux.crypto import fingerprint
+from auto_pki_client.aux.crypto import *
 from auto_pki_client.aux.discovery import get_est_services
 
 parser = argparse.ArgumentParser(
     description="Start Auto-PKI client"
+)
+parser.add_argument(
+    '--serial-number', '-s',
+    help="Serial number of device.",
+    default="serialnumber._serial.vendor.com",
+    type=str
 )
 parser.add_argument(
     '--config', '-c',
@@ -43,6 +51,12 @@ parser.add_argument(
     '--quiet', '-q',
     action='store_true'
 )
+parser.add_argument(
+    '--force', '-f',
+    help="Force to do any action",
+    action='store_true'
+)
+
 args = parser.parse_args(sys.argv[1:])
 
 args.verbose += (0,1)[not args.quiet]
@@ -79,16 +93,38 @@ def discovery_est(conf):
     srv_cfg['host'] = service.server
     srv_cfg['port'] = service.port
 
+def log_cert_info(cert):
+    issuer = cert.get_issuer()
+    subject = cert.get_subject()
+    not_after = cert.get_notAfter()
+    not_before = cert.get_notBefore()
+
+    log.info("CERT INFO: ")
+    log.info(
+        "\tIssuer:\tC=%s,ST=%s,L=%s,O=%s,OU=%s,CN=%s",
+        issuer.C, issuer.ST, issuer.L, issuer.O, issuer.OU, issuer.CN
+    )
+    log.info(
+        "\tSubject:\tC=%s,ST=%s,L=%s,O=%s,OU=%s,CN=%s",
+        subject.C, subject.ST, subject.L, subject.O, subject.OU, subject.CN
+    )
+    log.info("\tNot before:\t%s", not_before)
+    log.info("\tNot after:\t%s", not_after)
 
 with Config(args.config) as conf:
-    common_name = socket.getfqdn()
-
     cli_cfg = conf['client']
     srv_cfg = conf['server']
 
+    common_name = socket.getfqdn()
+
+    if not 'serial_number' in cli_cfg or args.force:
+        cli_cfg['serial_number'] = args.serial_number
+
+    device_sn = cli_cfg['serial_number']
     csr_path = os.path.join(cli_cfg['certs_dir'], common_name+'.csr')
     cert_path = os.path.join(cli_cfg['certs_dir'], common_name+'.pem')
     priv_path = os.path.join(cli_cfg['certs_dir'], common_name+'.key.pem')
+    exported_path = os.path.join(cli_cfg['certs_dir'], common_name+'.pfx')
 
     if os.path.isfile(cert_path) and os.path.isfile(priv_path):
         log.error("Skip generate Client Cert. Certificate already present in %s", cert_path)
@@ -124,7 +160,16 @@ with Config(args.config) as conf:
             cacert_file.write(cacert_str)
             log.debug("cacert writed to file %s", cacert_path)
 
-        log.warn("Adding CA. Fingerprint: %s", fingerprint(cacert_path))
+        cacert_info = get_cert_info(cacert_path)
+        log.info("Initial cacert bootstraping completed.")
+        log_cert_info(cacert_info)
+
+        cacert_fingerprint = fingerprint(cacert_info)
+        log.warn(
+            "Adding CA. Fingerprint: %s\n\n%s\n",
+            cacert_fingerprint,
+            pyqrcode.create(cacert_fingerprint).terminal(quiet_zone=1)
+        )
 
         client = Client(host, port, cacert_path)
 
@@ -143,12 +188,13 @@ with Config(args.config) as conf:
             sys.exit(1)
     else:
         # Create CSR and get private key used to sign the CSR.
-        common_name = socket.getfqdn()
-        priv, csr = client.create_csr(common_name, subject_alt_name=b"DNS:serialnumber._serial.vendor.com")
+        log.info("Generating client CSR...(RSA,2048)")
+        priv, csr = client.create_csr(common_name, subject_alt_name=b"DNS:"+device_sn)
 
         try:
             with open(csr_path, 'w') as cert_file:
                 cert_file.write(csr)
+            log.info("Writing CSR file to %s",csr_path)
         except (OSError) as ex:
             log.error("Failed to write CSR file to %s. ERROR: %s", csr_path, ex.message)
             sys.exit(2)
@@ -156,6 +202,7 @@ with Config(args.config) as conf:
         try:
             with open(priv_path, 'w') as cert_file:
                 cert_file.write(priv)
+            log.info("Writing private key file to %s", priv_path)
         except (OSError) as ex:
             log.error("Failed to write Private Key file to %s. ERROR: %s", priv_path, ex.message)
             sys.exit(3)
@@ -170,15 +217,21 @@ with Config(args.config) as conf:
 
             with open(cert_path, 'w') as cert_file:
                 cert_file.write(client_cert)
+            log.info("Writing client certificate file to %s", cert_path)
+            with open(exported_path, 'wb') as export_file:
+                export_file.write(export_to_pkcs12(cert_path, priv_path, cacert_path, cli_cfg['export_key']))
+            log.info("Exporting client certificate bundle as PKCS12 to %s", exported_path)
+
         except (TryLater) as ex:
             if not args.wait_for_cert:
                 break
             sleep_sec = ex.seconds
         except (RequestError) as ex:
             log.error("Request error to EST simple enroll service. ERROR: %s", ex.message)
-        except (OSError) as ex:
+        except (IOError, OSError) as ex:
             log.error("Failed to write Certificate file to %s. ERROR: %s", cert_path, ex.message)
             sys.exit(4)
 
-        log.info("Waiting for retry %d seconds.", ex.seconds)
-        sleep(sleep_sec)
+        if not done:
+            log.info("Waiting for retry %d seconds.", sleep_sec)
+            sleep(sleep_sec)

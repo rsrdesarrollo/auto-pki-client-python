@@ -62,6 +62,7 @@ def _exit_handler(signum, frame):
     sys.exit()
 
 signal.signal(signal.SIGTERM, _exit_handler)
+signal.signal(signal.SIGINT, _exit_handler)
 
 def discovery_est(conf):
     services = get_est_services()

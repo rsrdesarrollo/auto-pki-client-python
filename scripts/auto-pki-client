@@ -166,9 +166,8 @@ with Config(args.config) as conf:
 
         cacert_fingerprint = fingerprint(cacert_info)
         log.warn(
-            "Adding CA. Fingerprint: %s\n\n%s\n",
-            cacert_fingerprint,
-            pyqrcode.create(cacert_fingerprint).terminal(quiet_zone=1)
+            "Adding CA. Fingerprint: %s\n",
+            cacert_fingerprint
         )
 
         client = Client(host, port, cacert_path)
@@ -190,6 +189,15 @@ with Config(args.config) as conf:
         # Create CSR and get private key used to sign the CSR.
         log.info("Generating client CSR...(RSA,2048)")
         priv, csr = client.create_csr(common_name, subject_alt_name=b"DNS:"+device_sn)
+
+        csr_obj = crypto.load_certificate_request(crypto.FILETYPE_PEM, csr)
+
+        csr_fingerprint = fingerprint(csr_obj)
+        log.warn(
+            "Client. Fingerprint: %s\n\n%s\n",
+            csr_fingerprint,
+            pyqrcode.create(csr_fingerprint).terminal(quiet_zone=1)
+        )
 
         try:
             with open(csr_path, 'w') as cert_file:
